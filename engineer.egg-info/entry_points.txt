@@ -1,0 +1,4 @@
+[console_scripts]
+discover_tests = engineer.test.discover_tests:main
+sweep = engineer.sweep.sweep:main
+sweep_local = engineer.sweep.sweep_local:main

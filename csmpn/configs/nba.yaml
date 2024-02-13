@@ -1,0 +1,89 @@
+project: clifford-simplicial
+entity: badboyz2000
+program: csmpn/nba.py
+
+command:
+  - ${env}
+  - ${interpreter} # python
+  - ${program} # csmpn/main.py
+  - -C csmpn/configs/engineer/trainer.yaml
+  - -C csmpn/configs/optimizer/adam.yaml
+  # - -C csmpn/configs/dataset/dataset.yaml
+  - --dataset.module=csmpn.data.nba.NBADataset
+  - -C csmpn/configs/model/models.yaml
+  - --trainer.val_check_interval=128
+  # 15000 for ethonal
+  - --trainer.max_steps=10000 # = len(trainer_loader) * epochs
+  - ${args}
+method: grid
+cluster:
+  address: snellius
+  slurm: --partition=gpu --time=36:00:00 --gpus-per-node=1
+  directory: /home/cliu2/clifford-simplicial/
+  command: WANDB_ENABLED=TRUE wandb agent --count=1 {entity}/{project}/{sweep_id}
+  # num_jobs: 3
+  # address: das5
+  # slurm: --gres=gpu:1 --mem=16G --cpus-per-task=6 --time=120:00:00
+  # directory: /var/scratch/cliu4/clifford-simplicial/
+  # command: WANDB_ENABLED=TRUE wandb agent --count=1 {entity}/{project}/{sweep_id}
+  # address: ivi
+  # slurm: -p bas --account=basusers --gres=gpu:1 --mem=16G --cpus-per-task=6 --time=120:00:00
+  # directory: /home/cliu3/clifford-simplicial/
+  # command: WANDB_ENABLED=TRUE wandb agent --count=1 {entity}/{project}/{sweep_id}
+  # address: das6
+  # slurm: --gres=gpu:1 --mem=16G --cpus-per-task=6 --time=120:00:00
+  # directory: /var/scratch/cliu4/clifford-simplicial/
+  # command: WANDB_ENABLED=TRUE wandb agent --count=1 {entity}/{project}/{sweep_id}
+
+# parameters:
+#   model.num_layers:
+#   # values: [2, 3, 4]
+#     values: [2, 3, 4]
+#   model.num_hidden:
+#     values: [16, 28, 40]
+#     # values: [16, 28, 40]
+#   optimizer.lr:
+#           # values: [1.e-3, 4.e-3, 6.e-4]
+#     values: [1.e-3]
+#   optimizer.weight_decay:
+#           # values: [0, 1.e-2, 1.e-4]
+#     values: [1.e-4]
+
+####
+# vanilla clifford, all-connected
+
+# heavy atoms
+# aspirin (13 nodes): node: 2.5, edges: 1, triangles: 1 del ['1_1']
+# benzene (6 nodes): node: 10000, edges: 1e8 triangles: 1e8 keep ['1_1']
+# ethanol (3 nodes): node: 10000, edges: 1e8 triangles: 1e8 keep ['1_1']
+# malonaldehyde (5 nodes): node: 10000, edges: 1e8, triangles: 1e8 keep ['1_1']
+
+# with hydrogen atoms 
+# aspirin (21 nodes): node: 2.5, edges: 1, triangles: 1 del ['1_1']
+# benzene (20 nodes): node: 2.5 , edges: 1.5  triangles: 1 del ['1_1']
+# ethanol (9 nodes): node: 2.5, edges: 1 triangles: 1 del ['1_1']
+# malonaldehyde (9 nodes): node: 2.5, edges: 1 , triangles: 1 del ['1_1']
+
+parameters:
+  seed:
+    values: [0, 1]
+  _model_simplicial:
+    values:
+      [
+        # "'--model.module=csmpn.models.nba.nba_cmpnn.NBACliffordMPNN --dataset.simplicial=False '",
+        "'--model.module=csmpn.models.nba.nba_cssmpnn.NBACliffordSharedSimplicialMPNN --dataset.simplicial=True'",
+      ]
+  dataset.dis:
+    values: [30, 35, 40, 10000]
+  dataset.mode:
+    values: ['atk']
+  model.num_layers:
+    values: [4]
+  model.num_hidden:
+    # values: [28]
+    values: [32]
+  optimizer.lr:
+    # values: [5.e-4]
+    values: [5.e-3]
+  # optimizer.weight_decay:
+  #   values: [1.e-6]

@@ -1,0 +1,59 @@
+project: clifford-simplicial
+entity: badboyz2000
+program: csmpn/motion.py
+
+command:
+  - ${env}
+  - ${interpreter} # python
+  - ${program} # csmpn/main.py
+  # Dataset
+  - --dataset.module=csmpn.data.motion.MotionDataset
+  - -C csmpn/configs/engineer/trainer.yaml
+  - -C csmpn/configs/optimizer/adam.yaml
+  - -C csmpn/configs/model/models.yaml
+  - --trainer.val_check_interval=128
+  - --trainer.max_steps=10000 # = len(trainer_loader) * epochs
+  - ${args}
+method: grid
+cluster:
+  # address: snellius
+  # slurm: --partition=gpu --time=24:00:00 --gpus-per-node=1
+  # directory: /home/clui2/clifford-simplicial/
+  # command: WANDB_ENABLED=TRUE wandb agent --count=1 {entity}/{project}/{sweep_id}
+  # num_jobs: 3
+  #   # address: das5
+  #   # slurm: --gres=gpu:1 --mem=16G --cpus-per-task=6 --time=96:00:00
+  #   # directory: /var/scratch/druhe/monorail/
+  #   # command: WANDB_ENABLED=TRUE wandb agent --count=1 druhe/{project}/{sweep_id}
+  # address: ivi
+  # slurm: -p bas --account=basusers --gres=gpu:1 --mem=16G --cpus-per-task=6 --time=96:00:00
+  # directory: /home/cliu3/clifford-simplicial/
+  # command: WANDB_ENABLED=TRUE wandb agent --count=1 {entity}/{project}/{sweep_id}
+  address: das6
+  slurm: --gres=gpu:1 --mem=16G --cpus-per-task=6 --time=96:00:00
+  directory: /var/scratch/cliu4/clifford-simplicial/
+  command: WANDB_ENABLED=TRUE wandb agent --count=1 {entity}/{project}/{sweep_id}
+
+parameters:
+  _model_simplicial:
+    values:
+      [
+        # "'--model.module=csmpn.models.motion_mpnn.MotionMPNN --dataset.simplicial=False'"
+        # "'--model.module=csmpn.models.models.EGNN_motion --dataset.simplicial=False'"
+        # "'--model.module=csmpn.models.motion_cmpnn.MotionCliffordMPNN --dataset.simplicial=False'",
+        "'--model.module=csmpn.models.motion_cssmpnn.MotionCliffordSharedSimplicialMPNN --dataset.simplicial=True'",
+        # "'--model.module=csmpn.models.motion_esmpn.MotionESMPN --dataset.simplicial=True --dataset.ESMPN=True'"
+        # "'--model.module=csmpn.models.models.CliffordSharedSimplicialMPNN_motion --dataset.simplicial=True'",
+      ]
+  dataset.num_training_samples:
+    values: [200]
+  # model.num_layers:
+  #   values: [8]
+  # model.num_hidden:
+  #   values: [28]
+  optimizer.lr:
+    values: [5.e-4]
+  optimizer.weight_decay:
+    values: [1.e-5]
+  # model.condition:
+  #   values: [True, False]

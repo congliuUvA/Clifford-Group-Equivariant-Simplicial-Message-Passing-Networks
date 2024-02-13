@@ -1,0 +1,14 @@
+# conda env create -f environment.yml
+name: clisim
+channels:
+  - pytorch
+  - nvidia
+  - pyg
+dependencies:
+  - pytorch=1.13.1
+  - pytorch-cuda=11.7
+  - pytorch-sparse=0.6.17
+  - pytorch-cluster=1.6.1
+  - pytorch-scatter=2.1.1
+  - pytorch-spline-conv=1.2.2
+  - pyg=2.3.0

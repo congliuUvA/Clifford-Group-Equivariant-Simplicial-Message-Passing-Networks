@@ -1,0 +1,13 @@
+scheduler:
+  # module: torch.optim.lr_scheduler.ReduceLROnPlateau
+  # mode: min
+  # factor: 0.5
+  # patience: 20.0
+  # verbose: True
+  
+  # module: torch.optim.lr_scheduler.StepLR
+  
+  module: torch.optim.lr_scheduler.CosineAnnealingLR
+
+
+  
