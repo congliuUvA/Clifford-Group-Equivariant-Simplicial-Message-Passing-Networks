@@ -30,7 +30,6 @@ def main(config):
 
     trainer_config = config["trainer"]
     trainer_config["scheduler"] = scheduler
-    # trainer_config["wandb"] = config["wandb"]
     trainer = trainer_module(
         **trainer_config,
     )

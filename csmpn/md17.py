@@ -31,15 +31,14 @@ def main(config):
     scheduler = CosineAnnealingLR(
         optimizer,
         steps,
-        warmup_steps=int(6e3),
-        decay_steps=int(1 / 3 * steps),
+        warmup_steps=int(1 / 64 * steps),
+        decay_steps=int(1 / 4 * steps),
     )
 
     trainer_module = engineer.load_module(config["trainer"].pop("module"))
 
     trainer_config = config["trainer"]
     trainer_config["scheduler"] = scheduler
-    # trainer_config["wandb"] = config["wandb"]
     trainer = trainer_module(
         **trainer_config,
     )

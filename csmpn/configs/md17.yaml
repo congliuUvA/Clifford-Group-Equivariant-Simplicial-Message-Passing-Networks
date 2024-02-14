@@ -7,15 +7,12 @@ command:
   - -C csmpn/configs/engineer/trainer.yaml
   - -C csmpn/configs/optimizer/adam.yaml
   - --dataset.module=csmpn.data.md17.MD17Dataset
-  - -C csmpn/configs/model/models.yaml
+  - --model.module=csmpn.models.md17_cssmpnn.CliffordSharedSimplicialMPNN_md17
   - --trainer.val_check_interval=128
   - --trainer.max_steps=150000 
   - ${args}
 
 parameters:
-  seed:
-    values:
-      [42]
   _model_simplicial:
     values:
       [
@@ -25,9 +22,9 @@ parameters:
     values:
       [
         --dataset.molecule_type='aspirin' --dataset.dis=3,
-        # --dataset.molecule_type='benzene' --dataset.dis=10000,
-        # --dataset.molecule_type='ethanol' --dataset.dis=10000,
-        # --dataset.molecule_type='malonaldehyde' --dataset.dis=10000,
+        --dataset.molecule_type='benzene' --dataset.dis=10000,
+        --dataset.molecule_type='ethanol' --dataset.dis=10000,
+        --dataset.molecule_type='malonaldehyde' --dataset.dis=10000,
       ]
   dataset.batch_size:
     values: [100]

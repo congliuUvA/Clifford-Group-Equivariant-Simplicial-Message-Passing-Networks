@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from csmpn.algebra.cliffordalgebra import CliffordAlgebra
 from csmpn.models.cegnn_utils import MVLinear, EGCL, CEMLP
 from engineer.metrics.metrics import MetricCollection, Loss
-from torch_geometric.nn import MessagePassing, global_mean_pool
+from torch_geometric.nn import global_mean_pool
 import math
 
 
@@ -86,38 +86,11 @@ class HullsCliffordSharedSimplicialMPNN(nn.Module):
         )
 
     def _forward(self, h, edges, node_attr=None, edge_attr=None):
-        # h = self.embedding(h)
         for layer in self.layers:
             h = layer(h, edges, node_attr=node_attr, edge_attr=edge_attr)
 
         h = self.projection(h)
         return h
-
-    # def embed_simplicial_complex(self, graph):
-    #     # For each node, indicates the starting index of the graph it belongs to.
-    #     graph_start_idx = graph.x_ind_ptr[:-1][graph.x_ind_batch]
-
-    #     # Gets the vertex indices for each simplex in the graph.
-    #     simplex_indices = graph.x_ind.long() + graph_start_idx.unsqueeze(-1)
-
-    #     input = torch.zeros(
-    #         (len(graph.x_ind), self.hidden_features, 2**self.algebra.dim),
-    #         device=graph.batch.device,
-    #     )
-
-    #     for d in range(self.max_dim + 1):
-            
-    #         d_simplices = simplex_indices[graph.node_types == d, : d + 1]
-    #         pos = graph.input[d_simplices]
-
-    #         # Clifford embedding
-    #         pos = self.algebra.embed_grade(pos, 1).mean(dim=1, keepdim=True)
-
-    #         # Concatenate
-    #         embedding = self.cl_feature_embedding[d](pos)
-    #         input[graph.node_types == d] = embedding
-
-    #     return input
 
     def embed_simplicial_complex(self, graph):
         # For each node, indicates the starting index of the graph it belongs to.
@@ -172,17 +145,12 @@ class HullsCliffordSharedSimplicialMPNN(nn.Module):
         x = self.embed_simplicial_complex(batch)
         node_attr, edge_attr = self.embed_simplex_types(batch)
 
-        # x = x[batch.node_types == 0]
-        # vertices = (batch.node_types == 0).nonzero()
-        # mask = torch.isin(batch.edge_index, vertices).all(dim=0)
-        # edge_index = batch.edge_index[:, mask]
         pred = self._forward(x, batch.edge_index, node_attr, edge_attr)
 
         pred = pred[:, :, 0]
 
         # all aggregated at once
         pred = global_mean_pool(pred, batch.x_ind_batch)
-
 
         loss = F.mse_loss(pred.squeeze(-1), batch.target, reduction='none')
 

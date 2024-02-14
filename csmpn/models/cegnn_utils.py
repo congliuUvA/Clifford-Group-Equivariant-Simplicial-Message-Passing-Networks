@@ -2,7 +2,6 @@ import torch.nn as nn
 import torch
 import math
 from torch_geometric.nn import MessagePassing
-from csmpn.algebra.cliffordalgebra import CliffordAlgebra
 EPS = 1e-6
 
 def unsorted_segment_mean(data, segment_ids, num_segments):

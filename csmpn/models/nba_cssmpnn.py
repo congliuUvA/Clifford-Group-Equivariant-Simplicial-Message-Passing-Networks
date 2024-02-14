@@ -1,11 +1,9 @@
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
-from torch_geometric.nn import global_mean_pool
-
-from csmpn.models.layers import  EGCL, CEMLP
+ 
 from csmpn.algebra.cliffordalgebra import CliffordAlgebra
-from csmpn.models.cegnn_utils import MVLinear
+from csmpn.models.cegnn_utils import MVLinear, EGCL, CEMLP
 
 from engineer.metrics.metrics import Loss, MetricCollection
 import itertools

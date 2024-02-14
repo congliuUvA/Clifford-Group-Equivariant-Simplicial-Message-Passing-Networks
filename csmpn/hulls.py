@@ -1,7 +1,6 @@
 import engineer
 
 from engineer.schedulers.cosine import CosineAnnealingLR
-from torch_geometric.loader import DataLoader
 
 def main(config):
     dataset_config = config["dataset"]
@@ -19,13 +18,6 @@ def main(config):
         model.parameters(), **optimizer_config
     )
 
-    # scheduler_config = config['scheduler']
-    # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-    #     optimizer, 
-    #     mode=scheduler_config["mode"], 
-    #     factor=scheduler_config["factor"], 
-    #     patience=scheduler_config["patience"])
-
     steps = config["trainer"]["max_steps"]
     scheduler = CosineAnnealingLR(
         optimizer,
@@ -38,7 +30,6 @@ def main(config):
 
     trainer_config = config["trainer"]
     trainer_config["scheduler"] = scheduler
-    # trainer_config["wandb"] = config["wandb"]
     trainer = trainer_module(
         **trainer_config,
     )

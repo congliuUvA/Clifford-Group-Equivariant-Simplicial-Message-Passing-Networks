@@ -28,12 +28,11 @@ class SimplicialTransform(BaseTransform):
     """Todo: add
     The adjacency types (adj) are saved as properties, e.g. object.adj_1_2 gives the edge index from 1-simplices to
     2-simplices."""
-    def __init__(self, dim=2, dis:float=2.0, use_for_loop=False, label="nbody", edge_th=10000., tri_th=10000., molecule_type=None):
+    def __init__(self, dim=2, dis:float=2.0, label=None, edge_th=10000., tri_th=10000., molecule_type=None):
         self.algebra = CliffordAlgebra((1, 1, 1))
         self.dim = dim
         self.dis = dis
         self.label = label
-        self.use_for_loop = use_for_loop
         self.edge_th = edge_th
         self.tri_th = tri_th
         self.molecule_type = molecule_type
@@ -52,10 +51,6 @@ class SimplicialTransform(BaseTransform):
                 # get relevant dictionaries using the Rips complex based on the geometric graph or point cloud
                 x_dict, adj_dict = rips_lift(graph, self.dim, self.dis)
 
-        # vertices = len(x_dict[0])
-        # edges = len(x_dict[1]) if 1 in x_dict else 0
-        # triangles = len(x_dict[2]) if 2 in x_dict else 0
-        # print(f"Vertices {vertices}, Edges {edges}, Triangles {triangles}")
         sim_com_data = SimplicialComplexData()
         sim_com_data = sim_com_data.from_dict(graph.to_dict())
 
@@ -64,24 +59,20 @@ class SimplicialTransform(BaseTransform):
 
         for k, v in adj_dict.items():
             sim_com_data[f'adj_{k}'] = v
-        # # keep the original node-node connections
-        # sim_com_data.adj_0_0 = graph.edge_index
-        num_per_dim = self.get_num_simplicies(x_dict)
 
+        num_per_dim = self.get_num_simplicies(x_dict)
         sim_com_data = self.add_missing_adj(sim_com_data)
         sim_com_data = self.get_edge(x_dict, sim_com_data, num_per_dim)
 
         if self.label == "md17":
-            sim_com_data = self.gen_md17_feat(sim_com_data, num_per_dim, self.dim)
+            sim_com_data = self.gen_md17_feat(sim_com_data, num_per_dim)
         elif self.label == "nba":
             sim_com_data = self.gen_nba_feat(sim_com_data, num_per_dim)
         elif self.label == "hulls":
-            sim_com_data = self.gen_hulls_feat(sim_com_data, num_per_dim, self.dim)
+            sim_com_data = self.gen_hulls_feat(sim_com_data, num_per_dim)
         else:
             raise ValueError(f"Unknown dataset {self.label}.")
-        if self.use_for_loop:
-            return sim_com_data
-        # if not using for-loop model, then construct the big graph.
+
         graphdata = Data(
             edge_index=sim_com_data.edge_index,
             node_types=sim_com_data.node_types,
@@ -181,18 +172,20 @@ class SimplicialTransform(BaseTransform):
     
     def gen_simplicial_type_feat(self, num_node_list, graph):
         # we need also assign the simplicial dimensions to each simplicies in our graph. 
-        # Sometimes we need to predict the features (positions) of the dim0 simplicies in the graph (E.g. NBody)
         node_types = torch.zeros((num_node_list[-1])).type(torch.long)
         for dim in range(len(num_node_list)-1):
             node_types[num_node_list[dim]: num_node_list[dim+1]] = dim
         graph[f"node_types"] = node_types
         return graph
 
-    def gen_hulls_feat(self, graph, num_node_list, dim):
+    def gen_hulls_feat(self, graph, num_node_list):
         factor = len(num_node_list) - 1
+        # position features
         input_feature_matrix = torch.zeros((num_node_list[-1], 5))
         input_feature_matrix[: num_node_list[1]] = graph.input
         graph.input = input_feature_matrix
+
+        # make permutations for nodes, edges and triangles
         num_dim_perms = math.factorial(factor) * factor
         index_matrix = torch.zeros((num_node_list[-1], num_dim_perms))
         for i in range(self.dim + 1):
@@ -208,7 +201,7 @@ class SimplicialTransform(BaseTransform):
         return graph
 
 
-    def gen_md17_feat(self, graph, num_node_list, dim):
+    def gen_md17_feat(self, graph, num_node_list):
         num_frames = graph.y.shape[1]
         graph.charges = graph.charges.unsqueeze(-1).repeat(1, num_frames).unsqueeze(-1)
         # pos features
@@ -227,7 +220,7 @@ class SimplicialTransform(BaseTransform):
         graph.charges = charge_feature_matrix
 
         # index
-        index_matrix = torch.zeros((num_node_list[-1], dim+1))
+        index_matrix = torch.zeros((num_node_list[-1], 3))
         for i in range(self.dim+1):
             if hasattr(graph, f"x_{i}"):
                 index_matrix[num_node_list[i]: num_node_list[i+1], :i+1] = graph[f"x_{i}"]
@@ -307,32 +300,9 @@ class ManualTransform(BaseTransform):
         graph['x_1'] = x_1
         graph['x_2'] = x_2
         edge_index = torch.cat((graph.edge_index, added_edge_index), dim=-1)
-
-        # pos features
-        # pos_feature_matrix = torch.zeros((self.num_nodes + self.num_edges + self.num_tris, 3))
-        # pos_feature_matrix[: self.num_nodes] = graph.loc
-        # graph['pos'] = pos_feature_matrix
-
-        # vel features
-        # vel_feature_matrix = torch.zeros((self.num_nodes + self.num_edges + self.num_tris, 3))
-        # vel_feature_matrix[: self.num_nodes] = graph.vel
-        # graph.vel = vel_feature_matrix
         num_node_list = [0, self.num_nodes, self.num_nodes + self.num_edges, self.num_nodes + self.num_edges + self.num_tris]
         graph = self.gen_motion_feat(graph, num_node_list=num_node_list)
-        # # index 
-        # index_matrix = torch.zeros((self.num_nodes + self.num_edges + self.num_tris, 3))
-        # index_matrix[:self.num_nodes, :1] = x_0
-        # index_matrix[self.num_nodes: self.num_nodes + self.num_edges, :2] = x_1
-        # index_matrix[self.num_nodes + self.num_edges: self.num_nodes + self.num_edges + self.num_tris, :3] = x_2
-        # graph.x_ind = index_matrix
-
-        # node_types = torch.zeros((self.num_nodes + self.num_edges + self.num_tris)).type(torch.long)
-        # node_types[:self.num_nodes] = 0
-        # node_types[self.num_nodes: self.num_nodes + self.num_edges] = 1
-        # node_types[self.num_nodes + self.num_edges:] = 2
-
         graph['edge_index'] = edge_index
-        # graph['node_types'] = node_types
         graph['edge_attr'] = edge_attr
         return graph
     

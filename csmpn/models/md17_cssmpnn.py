@@ -106,6 +106,7 @@ class CliffordSharedSimplicialMPNN_md17(nn.Module):
                 pos = pos[:,  index_permutations, ...].reshape(d_simplices.shape[0]*math.factorial(d + 1), pos.shape[2]*(d+1), -1)
                 vel = vel[:,  index_permutations, ...].reshape(d_simplices.shape[0]*math.factorial(d + 1), vel.shape[2]*(d+1), -1)
                 charges = charges[:,  index_permutations, ...].reshape(d_simplices.shape[0]*math.factorial(d + 1), charges.shape[2]*(d+1), -1)
+
                 # Clifford embedding
                 pos = self.algebra.embed_grade(pos, 1)
                 vel = self.algebra.embed_grade(vel, 1)

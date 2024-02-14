@@ -201,17 +201,6 @@ def simplicial_lift_hulls(graph: Data, dim: int):
 
         for simplex in k_simplex:
             simplex_tree.insert(simplex)
-    
-
-
-    # for node in range(len(input)):
-    #     simplex_tree.insert([node])
-
-    # for edge in edges:
-    #     simplex_tree.insert(edge)
-
-    # for triangle in triangles:
-    #     simplex_tree.insert(triangle)
 
     # generate dictionaries
     simplices = generate_simplicies_single(simplex_tree)

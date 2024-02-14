@@ -4,27 +4,21 @@ command:
   - ${env}
   - ${interpreter} 
   - ${program} 
-  # Trainer
   - --trainer.module=engineer.Trainer
   - --trainer.val_check_interval=1024
-  - --trainer.max_steps=131072 # = len(trainer_loader) * epochs
-  # Dataset
+  - --trainer.max_steps=131072
   - --dataset.module=csmpn.data.hulls.ConvexHullDataset
-  # Optimizer
   - --optimizer.module=torch.optim.Adam
   - ${args}
 
 parameters:
-  seed:
-    values:
-      [42]
   _model_simplicial:
     values:
       [
         "'--model.module=csmpn.models.hulls_cssmpnn.HullsCliffordSharedSimplicialMPNN --dataset.simplicial=True'",
       ]
   dataset.batch_size:
-    values: [8]
+    values: [16]
   model.lr:
     values: [0.001]
 
