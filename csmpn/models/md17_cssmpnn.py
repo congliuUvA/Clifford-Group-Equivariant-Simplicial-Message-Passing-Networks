@@ -9,7 +9,7 @@ import math
 import itertools
 
 class CliffordSharedSimplicialMPNN_md17(nn.Module):
-    def __init__(self, max_dim: int=2, num_input: int=30, num_hidden: int=28, num_out: int=10, num_layers: int=4, task_type="mse_regression", stats=None, condition=True) -> None:
+    def __init__(self, max_dim: int=2, num_input: int=30, num_hidden: int=32, num_out: int=10, num_layers: int=5, condition=True) -> None:
         super().__init__()
         self.algebra = CliffordAlgebra((1, 1, 1))
         self.max_dim = max_dim

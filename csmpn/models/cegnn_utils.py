@@ -98,7 +98,7 @@ class MVLayerNorm(nn.Module):
 
 class SteerableGeometricProductLayer(nn.Module):
     def __init__(
-        self, algebra, features, weight=None, include_first_order=True, normalization_init=0
+        self, algebra, features, include_first_order=True, normalization_init=0
     ):
         super().__init__()
 
@@ -117,7 +117,7 @@ class SteerableGeometricProductLayer(nn.Module):
             self.linear_left = MVLinear(algebra, features, features, bias=True)
 
         self.product_paths = algebra.geometric_product_paths
-        self.weight = nn.Parameter(torch.empty(features, self.product_paths.sum())) if weight is None else weight
+        self.weight = nn.Parameter(torch.empty(features, self.product_paths.sum()))
 
         self.reset_parameters()
 
@@ -158,7 +158,6 @@ class SteerableGeometricProductLayer(nn.Module):
 
 
 
-
 class CEMLP(nn.Module):
     def __init__(
         self,
@@ -175,7 +174,6 @@ class CEMLP(nn.Module):
         self.hidden_features = hidden_features
         self.out_features = out_features
         self.n_layers = n_layers
-
 
         layers = []
 
@@ -302,14 +300,15 @@ class MVLinear(nn.Module):
         self.in_features = in_features
         self.out_features = out_features
         self.subspaces = subspaces
-        
+
         if subspaces:
             self.weight = nn.Parameter(
                 torch.empty(out_features, in_features, algebra.n_subspaces)
             )
             self._forward = self._forward_subspaces
         else:
-            self.linear = nn.Linear(in_features, out_features, bias=False)
+            self.weight = nn.Parameter(torch.empty(out_features, in_features))
+
         if bias:
             self.bias = nn.Parameter(torch.empty(1, out_features, 1))
             self.b_dims = (0,)
@@ -320,20 +319,13 @@ class MVLinear(nn.Module):
         self.reset_parameters()
 
     def reset_parameters(self):
-        if self.subspaces:
-            torch.nn.init.normal_(self.weight, std=1 / math.sqrt(self.in_features))
-        else:
-            torch.nn.init.normal_(self.linear.weight, std=1 / math.sqrt(self.in_features))
-
+        torch.nn.init.normal_(self.weight, std=1 / math.sqrt(self.in_features))
 
         if self.bias is not None:
             torch.nn.init.zeros_(self.bias)
 
     def _forward(self, input):
-        input = torch.transpose(input, -2, -1)
-        input = self.linear(input)
-        input = torch.transpose(input, -2, -1)
-        return input
+        return torch.einsum("bm...i, nm->bn...i", input, self.weight)
 
     def _forward_subspaces(self, input):
         weight = self.weight.repeat_interleave(self.algebra.subspaces, dim=-1)

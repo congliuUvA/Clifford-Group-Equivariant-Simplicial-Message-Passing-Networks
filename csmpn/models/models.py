@@ -710,6 +710,7 @@ class EGNN_motion(nn.Module):
         backprop_loss = loss.mean()  # []
 
         return backprop_loss, {"loss": loss}
+    
 class CliffordSharedSimplicialMPNN_motion(nn.Module):
     def __init__(self, max_dim: int=2, num_input: int=2, num_hidden: int=16, num_out: int=1, num_layers: int=4, task_type="mse_regression", stats=None, condition=True) -> None:
         super().__init__()

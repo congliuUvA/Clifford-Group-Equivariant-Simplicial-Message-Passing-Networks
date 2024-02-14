@@ -70,20 +70,16 @@ parameters:
   _model_simplicial:
     values:
       [
-        # "'--model.module=csmpn.models.nba.nba_cmpnn.NBACliffordMPNN --dataset.simplicial=False '",
-        "'--model.module=csmpn.models.nba.nba_cssmpnn.NBACliffordSharedSimplicialMPNN --dataset.simplicial=True'",
+        # "'--model.module=csmpn.models.nba_cmpnn.NBACliffordMPNN --dataset.simplicial=False '",
+        "'--model.module=csmpn.models.nba_cssmpnn.NBACliffordSharedSimplicialMPNN --dataset.simplicial=True'",
       ]
   dataset.dis:
-    values: [30, 35, 40, 10000]
+    values: [10000]
   dataset.mode:
     values: ['atk']
   model.num_layers:
-    values: [4]
+    values: [3]
   model.num_hidden:
-    # values: [28]
-    values: [32]
+    values: [40]
   optimizer.lr:
-    # values: [5.e-4]
     values: [5.e-3]
-  # optimizer.weight_decay:
-  #   values: [1.e-6]

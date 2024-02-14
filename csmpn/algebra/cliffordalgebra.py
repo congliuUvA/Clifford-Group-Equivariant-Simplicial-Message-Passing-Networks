@@ -43,24 +43,15 @@ class CliffordAlgebra(nn.Module):
 
     def geometric_product(self, a, b, blades=None):
         cayley = self.cayley
+
         if blades is not None:
             blades_l, blades_o, blades_r = blades
             assert isinstance(blades_l, torch.Tensor)
             assert isinstance(blades_o, torch.Tensor)
             assert isinstance(blades_r, torch.Tensor)
             cayley = cayley[blades_l[:, None, None], blades_o[:, None], blades_r]
-            return torch.einsum("...i,ijk,...k->...j", a, cayley, b)
-        else:
-            a_reshaped = a.reshape(-1, 8)
-            b_reshaped = b.reshape(-1, 8)
 
-            cayley_reshaped = self.cayley.reshape(8, 64)
-            result_intermediate = torch.matmul(a_reshaped, cayley_reshaped)
-            result_intermediate_reshaped = result_intermediate.reshape(-1, 8, 8)
-            result_final = torch.matmul(result_intermediate_reshaped, b_reshaped.unsqueeze(-1)) 
-
-            result = result_final.squeeze(-1).reshape(a.shape)
-            return result
+        return torch.einsum("...i,ijk,...k->...j", a, cayley, b)
 
     def _grade_to_slice(self, subspaces):
         grade_to_slice = list()
@@ -117,7 +108,7 @@ class CliffordAlgebra(nn.Module):
         mv[..., s] = tensor
         return mv
 
-    def get(self, mv, blade_index) -> torch.Tensor:
+    def get(self, mv: torch.Tensor, blade_index: tuple[int]) -> torch.Tensor:
         blade_index = tuple(blade_index)
         return mv[..., blade_index]
 
@@ -259,6 +250,7 @@ class CliffordAlgebra(nn.Module):
                     gp_paths[i, j, k] = (m != 0).any()
 
         return gp_paths
+
 
     def split(self, mv):
         num_bases = 2 ** self.dim

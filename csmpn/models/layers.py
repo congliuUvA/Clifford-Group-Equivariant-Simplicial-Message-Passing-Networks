@@ -15,6 +15,7 @@ from torch_geometric.nn import global_mean_pool, MessagePassing, GINConv
 from torch_scatter import scatter_add, scatter_mean
 from csmpn.algebra.cliffordalgebra import CliffordAlgebra
 # import torch_sparse
+from csmpn.models.cegnn_utils import MVLinear, CEMLP, MVSiLU, MVLayerNorm, SteerableGeometricProductLayer
 import math
 
 algebra = CliffordAlgebra((1, 1, 1))

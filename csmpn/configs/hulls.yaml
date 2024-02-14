@@ -1,108 +1,30 @@
-project: clifford-simplicial
-entity: badboyz2000
 program: csmpn/hulls.py
 
 command:
   - ${env}
-  - ${interpreter} # python
-  - ${program} # csmpn/main.py
+  - ${interpreter} 
+  - ${program} 
   # Trainer
   - --trainer.module=engineer.Trainer
-  # - --trainer.val_check_interval=128
   - --trainer.val_check_interval=1024
-
   - --trainer.max_steps=131072 # = len(trainer_loader) * epochs
   # Dataset
   - --dataset.module=csmpn.data.hulls.ConvexHullDataset
   # Optimizer
   - --optimizer.module=torch.optim.Adam
-  # Model
-  # - --model.module=csmpn.models.gravity_cmpnn.GravityCMPNN
-  # - --model.module=csmpn.models.gravity_cssmpnn.GravityCliffordSharedSimplicialMPNN
   - ${args}
-method: grid
-cluster:
-  address: snellius
-  slurm: --partition=gpu --time=120:00:00 --gpus-per-node=1 --cpus-per-task=36
-  directory: /home/cliu2/clifford-simplicial/
-  command: WANDB_ENABLED=TRUE wandb agent --count=1 {entity}/{project}/{sweep_id}
-  # num_jobs: 3
-  #   # address: das5
-  #   # slurm: --gres=gpu:1 --mem=16G --cpus-per-task=6 --time=96:00:00
-  #   # directory: /var/scratch/druhe/monorail/
-  #   # command: WANDB_ENABLED=TRUE wandb agent --count=1 druhe/{project}/{sweep_id}
-  # address: ivi
-  # slurm: -p bas --account=basusers --gres=gpu:1 --mem=16G --cpus-per-task=6 --time=96:00:00
-  # directory: /home/cliu3/clifford-simplicial/
-  # command: WANDB_ENABLED=TRUE wandb agent --count=1 {entity}/{project}/{sweep_id}
-  # address: das6
-  # slurm: --gres=gpu:1 --mem=16G --cpus-per-task=6 --time=96:00:00
-  # directory: /var/scratch/cliu4/clifford-simplicial/
-  # command: WANDB_ENABLED=TRUE wandb agent --count=1 {entity}/{project}/{sweep_id}
-
-# parameters:
-#   model.num_layers:
-#   # values: [2, 3, 4]
-#     values: [2, 3, 4]
-#   model.num_hidden:
-#     values: [16, 28, 40]
-#     # values: [16, 28, 40]
-#   optimizer.lr:
-#           # values: [1.e-3, 4.e-3, 6.e-4]
-#     values: [1.e-3]
-#   optimizer.weight_decay:
-#           # values: [0, 1.e-2, 1.e-4]
-#     values: [1.e-4]
 
 parameters:
   seed:
     values:
-      [1]
+      [42]
   _model_simplicial:
     values:
       [
-        # "'--model.module=csmpn.models.hulls_mpnn.HullsMPNN --dataset.simplicial=False --dataset.batch_size=512'",
-        # "'--model.module=csmpn.models.hulls_dotproduct.HullsDotProd --dataset.simplicial=False --dataset.batch_size=512'",
-        # "'--model.module=csmpn.models.hulls_cmpnn.HullsCMPNN --dataset.simplicial=False --dataset.batch_size=128 --model.num_layers=5 --model.hidden_features=40'",
-        # "'--model.module=csmpn.models.hulls_cMACE.HullsCMACE --dataset.simplicial=False --dataset.batch_size=128 --model.num_layers=5 --model.hidden_features=28'",
-        # "'--model.module=csmpn.models.hulls_cGMACE.HullsCGMACE --dataset.simplicial=False --dataset.batch_size=128 --model.hidden_features=28 --model.num_basis=4 --model.num_prods=2 --model.num_layers=4'",
         "'--model.module=csmpn.models.hulls_cssmpnn.HullsCliffordSharedSimplicialMPNN --dataset.simplicial=True'",
-        # "'--model.module=csmpn.models.hulls_egnn.HullsEGNN --dataset.simplicial=False --dataset.batch_size=512'"
-        # "'--model.module=csmpn.models.hulls_clgnn.HullsClGNN --dataset.simplicial=False --dataset.batch_size=512'"
-        # "'--model.module=csmpn.models.hulls_esmpn.HullsESMPN --dataset.simplicial=True --dataset.ESMPN=True --dataset.batch_size=512'"
-        # "'--model.module=csmpn.models.hulls_gvp.HullsGVP --dataset.simplicial=False --dataset.batch_size=512'"
-        # "'--model.module=csmpn.models.hulls_vn.HullsVN --dataset.simplicial=False --dataset.batch_size=512 --optimizer.lr=5.e-4'"
       ]
-  # _dataset_model_dim:
-  #   values: 
-  #     [
-  #       # "'--dataset.dim=2 --model.max_dim=2'",
-  #       # "'--dataset.dim=3 --model.max_dim=3'",
-  #       # "'--dataset.dim=4 --model.max_dim=4'"
-  #       "'--dataset.dim=5 --model.max_dim=5'"
-  #     ]
-  # dataset.batch_size:
-  #   values: [128]
-  # model.num_layers:
-  #   values: [5]
-  #   # values: [4]
-  # model.hidden_features:
-  #   # values: [28]
-  #   values: [40]
+  dataset.batch_size:
+    values: [8]
+  model.lr:
+    values: [0.001]
 
-  # optimizer.lr:
-  # values: [1.e-3, 4.e-3, 6.e-4]
-  # values: [4.e-3]
-  # optimizer.weight_decay:
-  # values: [0, 1.e-2, 1.e-4]
-  # values: [1.e-4]
-
-  # _hidden_features_n_layers:
-  #   values:
-  #     [
-  #       "'--model.hidden_features=24 --model.n_layers=4'",
-  #       "'--model.hidden_features=28 --model.n_layers=3'",
-  #     ]
-  # _lr_batch_size:
-  #   values:
-  #     ["'--optimizer.lr=1e-3 --dataset.batch_size=32'"]

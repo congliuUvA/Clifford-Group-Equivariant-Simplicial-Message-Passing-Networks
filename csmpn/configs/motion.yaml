@@ -38,8 +38,6 @@ parameters:
   _model_simplicial:
     values:
       [
-        # "'--model.module=csmpn.models.motion_mpnn.MotionMPNN --dataset.simplicial=False'"
-        # "'--model.module=csmpn.models.models.EGNN_motion --dataset.simplicial=False'"
         # "'--model.module=csmpn.models.motion_cmpnn.MotionCliffordMPNN --dataset.simplicial=False'",
         "'--model.module=csmpn.models.motion_cssmpnn.MotionCliffordSharedSimplicialMPNN --dataset.simplicial=True'",
         # "'--model.module=csmpn.models.motion_esmpn.MotionESMPN --dataset.simplicial=True --dataset.ESMPN=True'"
@@ -47,13 +45,13 @@ parameters:
       ]
   dataset.num_training_samples:
     values: [200]
-  # model.num_layers:
-  #   values: [8]
-  # model.num_hidden:
-  #   values: [28]
+  model.num_layers:
+    values: [4]
+  model.num_hidden:
+    values: [28]
   optimizer.lr:
     values: [5.e-4]
   optimizer.weight_decay:
-    values: [1.e-5]
+    values: [1.e-4]
   # model.condition:
   #   values: [True, False]

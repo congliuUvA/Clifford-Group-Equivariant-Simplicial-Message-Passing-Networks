@@ -134,11 +134,11 @@ def generate_adjacencies_and_invariants(indices: Dict, simplex_tree: SimplexTree
 def generate_features(simplices: Dict[int, Set[FrozenSet]], indices: Dict[int, Dict[FrozenSet, int]]) -> Dict[int, Tensor]:
     x_dict = {}
     for i in range(len(simplices)):
-        num_dim_perms = math.factorial(i + 1) * (i + 1)
-        x = torch.zeros((len(simplices[i]), num_dim_perms))
+        # num_dim_perms = math.factorial(i + 1) * (i + 1)
+        x = torch.zeros((len(simplices[i]), i+1))
         for k, v in indices[i].items():
-            # x[v] = tensor(list(k))
-            x[v] = tensor(list(itertools.permutations(list(k)))).flatten()
+            x[v] = tensor(list(k))
+            # x[v] = tensor(list(itertools.permutations(list(k)))).flatten()
         x_dict[i] = x.long()
 
     return x_dict

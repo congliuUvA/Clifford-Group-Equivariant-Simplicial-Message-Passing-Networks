@@ -1,67 +1,16 @@
-project: clifford-simplicial
-entity: badboyz2000
 program: csmpn/md17.py
 
 command:
   - ${env}
-  - ${interpreter} # python
-  - ${program} # csmpn/main.py
+  - ${interpreter} 
+  - ${program} 
   - -C csmpn/configs/engineer/trainer.yaml
   - -C csmpn/configs/optimizer/adam.yaml
   - --dataset.module=csmpn.data.md17.MD17Dataset
   - -C csmpn/configs/model/models.yaml
   - --trainer.val_check_interval=128
-  # 15000 for ethonal
-  - --trainer.max_steps=100000 # = len(trainer_loader) * epochs
+  - --trainer.max_steps=150000 
   - ${args}
-method: grid
-cluster:
-  address: snellius
-  slurm: --partition=gpu --time=120:00:00 --gpus-per-node=1
-  directory: /home/cliu2/clifford-simplicial/
-  command: WANDB_ENABLED=TRUE wandb agent --count=1 {entity}/{project}/{sweep_id}
-  # num_jobs: 3
-  # address: das5
-  # slurm: --gres=gpu:1 --mem=16G --cpus-per-task=6 --time=120:00:00
-  # directory: /var/scratch/cliu4/clifford-simplicial/
-  # command: WANDB_ENABLED=TRUE wandb agent --count=1 {entity}/{project}/{sweep_id}
-  # address: ivi
-  # slurm: -p bas --account=basusers --gres=gpu:1 --mem=16G --cpus-per-task=6 --time=120:00:00
-  # directory: /home/cliu3/clifford-simplicial/
-  # command: WANDB_ENABLED=TRUE wandb agent --count=1 {entity}/{project}/{sweep_id}
-  # address: das6
-  # slurm: --gres=gpu:1 --mem=40G --cpus-per-task=12 --time=120:00:00
-  # directory: /var/scratch/cliu4/clifford-simplicial/
-  # command: WANDB_ENABLED=TRUE wandb agent --count=1 {entity}/{project}/{sweep_id}
-
-# parameters:
-#   model.num_layers:
-#   # values: [2, 3, 4]
-#     values: [2, 3, 4]
-#   model.num_hidden:
-#     values: [16, 28, 40]
-#     # values: [16, 28, 40]
-#   optimizer.lr:
-#           # values: [1.e-3, 4.e-3, 6.e-4]
-#     values: [1.e-3]
-#   optimizer.weight_decay:
-#           # values: [0, 1.e-2, 1.e-4]
-#     values: [1.e-4]
-
-####
-# vanilla clifford, all-connected
-
-# heavy atoms
-# aspirin (13 nodes): node: 2.5, edges: 1, triangles: 1 del ['1_1']
-# benzene (6 nodes): node: 10000, edges: 1e8 triangles: 1e8 keep ['1_1']
-# ethanol (3 nodes): node: 10000, edges: 1e8 triangles: 1e8 keep ['1_1']
-# malonaldehyde (5 nodes): node: 10000, edges: 1e8, triangles: 1e8 keep ['1_1']
-
-# with hydrogen atoms 
-# aspirin (21 nodes): node: 2.5, edges: 1, triangles: 1 del ['1_1']
-# benzene (20 nodes): node: 2.5 , edges: 1.5  triangles: 1 del ['1_1']
-# ethanol (9 nodes): node: 2.5, edges: 1 triangles: 1 del ['1_1']
-# malonaldehyde (9 nodes): node: 2.5, edges: 1 , triangles: 1 del ['1_1']
 
 parameters:
   seed:
@@ -70,31 +19,23 @@ parameters:
   _model_simplicial:
     values:
       [
-        # "'--model.module=csmpn.models.md17_cmpnn.MD17CliffordMPNN --dataset.simplicial=False'",
-        # "'--model.module=csmpn.models.md17_cmace.MD17CMACE --dataset.simplicial=False'",
         "'--model.module=csmpn.models.md17_cssmpnn.CliffordSharedSimplicialMPNN_md17 --dataset.simplicial=True'",
-        # "'--model.module=csmpn.models.md17_cssmpnn_for_loop.CliffordSimplicialMPNN_md17 --dataset.simplicial=True --dataset.use_for_loop=True --model.shared_message=False'"
-        # "'--model.module=csmpn.models.models.EMPSN_md17 --dataset.simplicial=True --dataset.ESMPN=True'"
       ]
-  dataset.dropout_rate:
-    values: [0.0]
-  dataset.molecule_type:
-    values: ['aspirin']
-    # values: ['aspirin', 'benzene', 'ethanol, malonaldehyde']
-  dataset.dis:
-    values: [3]
-  # _dim:
-  #   values: 
-  #     [
-  #       "'--model.max_dim=2 --dataset.dim=2'",
-  #       # "'--model.max_dim=3 --dataset.dim=3'",
-  #       # "'--model.max_dim=4 --dataset.dim=4'",
-  #     ]
+  _dataset.molecule_type_dis:
+    values:
+      [
+        --dataset.molecule_type='aspirin' --dataset.dis=3,
+        # --dataset.molecule_type='benzene' --dataset.dis=10000,
+        # --dataset.molecule_type='ethanol' --dataset.dis=10000,
+        # --dataset.molecule_type='malonaldehyde' --dataset.dis=10000,
+      ]
+  dataset.batch_size:
+    values: [100]
   model.num_layers:
-    values: [2]
+    values: [5]
   model.num_hidden:
     values: [32]
   optimizer.lr:
-    values: [1.e-3]
+    values: [3.e-3]
   optimizer.weight_decay:
     values: [1.e-6]

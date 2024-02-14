@@ -77,11 +77,6 @@ class MotionCliffordSharedSimplicialMPNN(nn.Module):
         self.projection = nn.Sequential(
             MVLinear(self.algebra, num_hidden, num_out),
         )
-        
-        self.projection = nn.Sequential(
-            CEMLP(self.algebra, num_hidden, num_hidden, num_hidden, n_layers=1),
-            MVLinear(self.algebra, num_hidden, num_out),
-        )
 
         self.train_metrics = self._setup_metrics()
         self.test_metrics = self._setup_metrics()
@@ -139,11 +134,6 @@ class MotionCliffordSharedSimplicialMPNN(nn.Module):
             dim=1,
         )
         return node_attr, edge_attr
-    
-    def featurization(self, x, node_attr):
-        x = torch.cat((x, node_attr), dim=1)
-        x = self.feature_embedding(x)
-        return x
 
     def forward(self, graph, step, mode):
         batch_size = graph.ptr.shape[0] - 1
@@ -158,8 +148,6 @@ class MotionCliffordSharedSimplicialMPNN(nn.Module):
         node_attr, edge_attr = self.embed_simplex_types(graph)
 
         x = self.embed_simplicial_complex(graph)
-
-        # x = self.featurization(x, node_attr)
 
         # message passing
         for layer in self.layers:
@@ -176,10 +164,8 @@ class MotionCliffordSharedSimplicialMPNN(nn.Module):
         loss = F.mse_loss(pred, targets, reduction="none").mean(dim=1)  # [B]
 
         backprop_loss = loss.mean()  # []
-        
+
         return backprop_loss, {"loss": loss}
-        # return pred, {"loss": loss}
-        # return pred
 
     def __str__(self):
         return f"Clifford Shared Simplicial MPNN for Motion Dataset"

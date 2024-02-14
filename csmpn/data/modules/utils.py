@@ -86,12 +86,10 @@ def rips_lift(
             "Graphs in datasets have to be specified with locations for constructing simplicial complexes."
         )
 
-    # The rips complex is for QM9 and NBody
     points = [loc[i].tolist() for i in range(loc.shape[0])]
     rips_complex = gudhi.RipsComplex(points=points, max_edge_length=dis)
 
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=dim)
-
     # generate dictionaries
     simplices = generate_simplicies_single(simplex_tree)
     indices = generate_indices_single(simplex_tree)
