@@ -20,21 +20,39 @@ We introduce Clifford Group Equivariant Simplicial Message Passing Networks, a m
   * `models/`: contains model and layer implementations.
 * `engineer/`: contains the training and evaluation scripts.
 
-## Usage and Datasets
+## Datasets and Experiments
+
+### Datasets
+Run `mkdir ./datasets/` to generate a folder for storing datasets of experiments
+
+#### Convex Hulls Volume
+Convex hulls dataset will be automatically generated and be used for training and evalutation by running `sweep_local csmpn/configs/hulls.yaml`.
+
+#### Human Walking Motion
+Human walking motion datasets are from [here](https://github.com/hanjq17/GMN). Please copy `spatial_graph/motion/motion.pkl` and `spatial_graph/motion/split.pkl` to `./datasets/`.
+
+#### MD17 Atomic Motion
+MD17 atomic datasets are from [here](http://quantum-machine.org/gdml/#datasets). Please run `mkdir ./datasets/md17/` and download corresponding molecules to `./datasets/md17/`.
+
+#### NBA Players Trajectory 
+NBA players trajectory datasets are from [here](https://github.com/alexmonti19/dagnet). Please see instructions there to download the datasets to `./datasets`.
+
+### Experiments
 This implementation uses conda environment, change the path of `miniconda/` in `activate.sh` to your local `miniconda/` path and run `sh activate.sh`.
 
 Run `pip install -e .`
 
-### Convex Hull Volume Prediction:  
+
+#### Convex Hulls Volume Prediction:  
 `sweep_local csmpn/configs/hulls.yaml` 
 
-### Human Walking Motion Prediction:
+#### Human Walking Motion Prediction:
 `sweep_local csmpn/configs/motion.yaml`
 
-### MD17 Atomic Motion Prediction:
+#### MD17 Atomic Motion Prediction:
 `sweep_local csmpn/configs/md17.yaml`
 
-### NBA Players trajectory Prediction:
+#### NBA Players trajectory Prediction:
 `sweep_local csmpn/configs/nba.yaml`
 
 ## Citation:
