@@ -182,11 +182,10 @@ class SimplicialTransform(BaseTransform):
         graph.input = input_feature_matrix
 
         # make permutations for nodes, edges and triangles
-        num_dim_perms = math.factorial(factor) * factor
-        index_matrix = torch.zeros((num_node_list[-1], num_dim_perms))
+        index_matrix = torch.zeros((num_node_list[-1], 3))
         for i in range(self.dim + 1):
             if hasattr(graph, f"x_{i}"):
-                index_matrix[num_node_list[i] : num_node_list[i + 1], : math.factorial(i + 1) * (i + 1)] = graph[
+                index_matrix[num_node_list[i] : num_node_list[i + 1], :i+1] = graph[
                     f"x_{i}"
                 ]
         graph.x_ind = index_matrix

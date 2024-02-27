@@ -6,6 +6,7 @@ from csmpn.models.cegnn_utils import MVLinear, EGCL, CEMLP
 from engineer.metrics.metrics import MetricCollection, Loss
 from torch_geometric.nn import global_mean_pool
 import math
+import itertools
 
 
 class HullsCliffordSharedSimplicialMPNN(nn.Module):
@@ -82,7 +83,7 @@ class HullsCliffordSharedSimplicialMPNN(nn.Module):
 
     def _setup_metrics(self):
         return MetricCollection(
-            {"loss": Loss(), "loss_pos": Loss(), "loss_mom": Loss()}
+            {"loss": Loss()}
         )
 
     def _forward(self, h, edges, node_attr=None, edge_attr=None):
@@ -94,28 +95,32 @@ class HullsCliffordSharedSimplicialMPNN(nn.Module):
 
     def embed_simplicial_complex(self, graph):
         # For each node, indicates the starting index of the graph it belongs to.
-        graph_start_idx = graph.ptr[:-1][graph.batch]
+        graph_start_idx = graph.x_ind_ptr[:-1][graph.x_ind_batch]
 
+        # Gets the vertex indices for each simplex in the graph.
         simplex_indices = graph.x_ind.long() + graph_start_idx.unsqueeze(-1)
 
         input = torch.zeros(
-            (len(graph.batch), self.hidden_features, 2**self.algebra.dim),
+            (len(graph.x_ind), self.hidden_features, 2**self.algebra.dim),
             device=graph.batch.device,
         )
-
         for d in range(self.max_dim + 1):
             
-            d_simplices = simplex_indices[graph.node_types == d, : math.factorial(d + 1) * (d + 1)]
-            d_simplices_permute = d_simplices.reshape(d_simplices.shape[0], (d+1), -1).permute(0, 2, 1).reshape(-1, d+1)
-            pos = graph.input[d_simplices_permute]
+            d_simplices = simplex_indices[graph.node_types == d, : d + 1]
+            pos = graph.input[d_simplices]
 
+            perm_dim = d + 1
+
+            index_list = list(range(perm_dim))
+            index_permutations = torch.tensor(list(itertools.permutations(index_list)), device=graph.x_ind.device)
+            pos = pos[:, index_permutations, ...].reshape(d_simplices.shape[0]*math.factorial(d + 1), d+1, -1)
             # Clifford embedding
             pos = self.algebra.embed_grade(pos, 1)
 
             # Concatenate
             features = pos
-            learnable_features = self.cl_feature_embedding[d](features).reshape(d_simplices.shape[0], math.factorial(d + 1), -1, 2**self.algebra.dim).sum(dim=1)
-            input[graph.node_types == d] = learnable_features
+            embedding = self.cl_feature_embedding[d](features).reshape(d_simplices.shape[0], math.factorial(d + 1), -1, 2**self.algebra.dim).sum(dim=1)
+            input[graph.node_types == d] = embedding
 
         return input
 
