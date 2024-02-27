@@ -38,11 +38,7 @@ class SimplicialTransform(BaseTransform):
         self.molecule_type = molecule_type
 
     def __call__(self, graph: Data):
-        # for MD17
-        # if self.label in {"md17", "gravity"}:
-        if self.label in {"gravity"}:
-            x_dict, adj_dict = simplicial_lift(graph, self.edge_th, self.tri_th)
-        elif self.label=="hulls":
+        if self.label=="hulls":
             x_dict, adj_dict = simplicial_lift_hulls(graph, self.dim)
         else:
             if self.molecule_type == "aspirin":

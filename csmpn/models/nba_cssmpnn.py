@@ -171,7 +171,7 @@ class NBACliffordSharedSimplicialMPNN(nn.Module):
 
         # message passing
         for layer in self.layers:
-            x = layer(x, graph.edge_index, edge_attr, node_attr, self.algebra)
+            x = layer(x, graph.edge_index, edge_attr, node_attr)
 
         out = x[torch.where(graph.node_types==0)]
 

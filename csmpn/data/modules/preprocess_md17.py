@@ -5,10 +5,10 @@ import os
 import networkx as nx
 from networkx.algorithms import tree
 
-dataroot = os.environ["DATAROOT"] + 'md17'
+dataroot = os.environ["DATAROOT"] + 'md17/'
 filt = False
 
-molecule_list = ['aspirin', 'benzene', 'ethanol', 'malonaldehyde']
+molecule_list = ['aspirin', 'benzene2017', 'ethanol', 'malonaldehyde']
 
 # train_period_length = 5000
 # val_period_length = 2000
@@ -29,7 +29,7 @@ atom_dict = {'H': 1, 'C': 6, 'N': 7, 'O': 8, 'F': 9}
 
 for molecule_type in molecule_list:
     print(molecule_type)
-    data_dir = dataroot + '/' + molecule_type + '.npz'
+    data_dir = dataroot + "md17_" + molecule_type + '.npz'
     data = np.load(data_dir)
     if molecule_type == 'uracil':
         sample_frequency = 10

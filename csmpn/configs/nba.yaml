@@ -9,7 +9,6 @@ command:
   - -C csmpn/configs/engineer/trainer.yaml
   - -C csmpn/configs/optimizer/adam.yaml
   - --dataset.module=csmpn.data.nba.NBADataset
-  - -C csmpn/configs/model/models.yaml
   - --trainer.val_check_interval=128
   - --trainer.max_steps=10000
   - ${args}
@@ -22,7 +21,7 @@ parameters:
   dataset.dis:
     values: [10000]
   dataset.mode:
-    values: ['atk']
+    values: ['atk', 'def']
   model.num_layers:
     values: [3]
   model.num_hidden:

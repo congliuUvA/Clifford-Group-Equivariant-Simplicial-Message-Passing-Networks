@@ -1,14 +1,14 @@
 import os
 import torch
 import numpy as np
-from csmpn.data.modules.simplicial_data import SimplicialTransform, ManualTransform, NodeSampler
+from csmpn.data.modules.simplicial_data import SimplicialTransform
 from torch_geometric.data import Data, InMemoryDataset, DataLoader as PyGDataLoader
 import numpy as np
 
 import torch
 import torch.nn.functional as F
 from torch_geometric.data import (InMemoryDataset, Data)
-from torch_geometric.nn import radius_graph, knn_graph
+from torch_geometric.nn import knn_graph
 from torch.utils.data.distributed import DistributedSampler
 dataroot = os.environ["DATAROOT"]
 class MD17:
@@ -106,7 +106,7 @@ class MD17SimplicialData(InMemoryDataset):
         torch.save((data, slices), self.processed_paths[0]) 
 
 class MD17Dataset:
-    def __init__(self, batch_size=100, dim=2, dis: float=2.5, simplicial=False, molecule_type='aspirin', ESMPN=False, dropout_rate=0.4, use_for_loop=False):
+    def __init__(self, batch_size=100, dim=2, dis: float=2.5, simplicial=False, molecule_type='aspirin', dropout_rate=0.4, use_for_loop=False):
         self.dim = dim
         self.dis = dis
         self.batch_size = batch_size
@@ -117,15 +117,12 @@ class MD17Dataset:
             self.test_dataset = MD17(partition='test', max_samples=2000, data_dir=dataroot, molecule_type=molecule_type, r=dis)
             self.valid_dataset = MD17(partition='val', max_samples=2000, data_dir=dataroot, molecule_type=molecule_type, r=dis)
         else:
-            self.model_name = "ESMPN" if ESMPN else "CSMP"
-            rootdir = f'{dataroot}md17_{molecule_type}_{dis}_{dim}_{self.label}_{self.model_name}'
-            rootdir = rootdir + "_loop" if use_for_loop else rootdir
-            self.transform = NodeSampler(sample_rate=dropout_rate) if dropout_rate != 0 else None
-            self.pre_transform = SimplicialTransform(label="md17", dim=dim, dis=dis, use_for_loop=use_for_loop, molecule_type=molecule_type) if not ESMPN else ESMPN_SimplicialTransform(dim=dim, dis=dis)
+            rootdir = f'{dataroot}md17_{molecule_type}_{dis}_{dim}_{self.label}'
+            self.pre_transform = SimplicialTransform(label="md17", dim=dim, dis=dis, molecule_type=molecule_type)
 
             self.train_dataset = MD17SimplicialData(
                 root=rootdir,
-                pre_transform=self.pre_transform, transform=self.transform, partition="train", num_samples=5000, molecule_type=molecule_type, r=dis,
+                pre_transform=self.pre_transform, partition="train", num_samples=5000, molecule_type=molecule_type, r=dis,
             )
             self.valid_dataset = MD17SimplicialData(
                 root=rootdir,
@@ -137,8 +134,6 @@ class MD17Dataset:
             )
         if self.simplicial:
             self.follow = ["node_types", "x_ind"]  
-            if ESMPN or use_for_loop:
-                self.follow += ["x_0", "x_1", "x_2"]
         else:
             self.follow = None
 

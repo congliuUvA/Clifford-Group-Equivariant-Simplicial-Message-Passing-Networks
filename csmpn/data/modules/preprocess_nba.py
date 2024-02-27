@@ -19,8 +19,6 @@ N_CELLS_X = 9   # how many cells along X
 N_CELLS_Y = 10  # how many cells along Y
 
 DATASETS_DIR = Path(os.environ['DATAROOT'])
-# dirs
-# DATASETS_DIR = Path('.').absolute().parent
 BASKET_DIR = DATASETS_DIR.absolute() / 'nba'
 
 

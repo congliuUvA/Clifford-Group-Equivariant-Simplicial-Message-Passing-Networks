@@ -8,7 +8,6 @@ from tqdm import trange
 from torch_geometric.data import InMemoryDataset
 from torch_geometric.data import Data
 from csmpn.data.modules.simplicial_data import SimplicialTransform
-from csmpn.data.ESMPN.simplicial_data import ESMPN_SimplicialTransform
 from tqdm import tqdm
 
 DATAROOT = os.environ["DATAROOT"]
@@ -80,7 +79,7 @@ class HullsSimplicial(InMemoryDataset):
 
 
 class ConvexHullDataset:
-    def __init__(self, num_samples=16384, batch_size=8, simplicial=False, dim=2, ESMPN=False) -> None:
+    def __init__(self, num_samples=16384, batch_size=8, simplicial=False, dim=2) -> None:
         super().__init__()
         self.simplicial = simplicial
 
@@ -89,20 +88,19 @@ class ConvexHullDataset:
             self.val_dataset = ConvexHull(num_samples, split="val")
             self.test_dataset = ConvexHull(num_samples, split="test")
         else:
-            self.model = "csmpn" if not ESMPN else "ESMPN"
             self.transform = SimplicialTransform(
                 dim=dim, label="hulls", edge_th=float("inf"), tri_th=float("inf")
-            ) if not ESMPN else ESMPN_SimplicialTransform(label="hulls")
+            )
             self.train_dataset = HullsSimplicial(
-                root=f'{DATAROOT}Hulls_{self.model}_dim{dim}',
+                root=f'{DATAROOT}Hulls_dim{dim}',
                 pre_transform=self.transform, n_samples=num_samples, split="train"
             )
             self.val_dataset = HullsSimplicial(
-                root=f'{DATAROOT}Hulls_{self.model}_dim{dim}',
+                root=f'{DATAROOT}Hulls_dim{dim}',
                 pre_transform=self.transform, n_samples=num_samples, split="val"
             )
             self.test_dataset = HullsSimplicial(
-                root=f'{DATAROOT}Hulls_{self.model}_dim{dim}',
+                root=f'{DATAROOT}Hulls_dim{dim}',
                 pre_transform=self.transform, n_samples=num_samples, split="test"
             )
 
@@ -110,8 +108,6 @@ class ConvexHullDataset:
 
         if simplicial:
             self.follow = ["node_types", "x_ind"]
-            if ESMPN:
-                self.follow += ["x_0", "x_1", "x_2"]
         else:
             self.follow = None
 

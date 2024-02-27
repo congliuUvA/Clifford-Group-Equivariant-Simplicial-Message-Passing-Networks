@@ -9,7 +9,7 @@ command:
   - --dataset.module=csmpn.data.motion.MotionDataset
   - -C csmpn/configs/engineer/trainer.yaml
   - -C csmpn/configs/optimizer/adam.yaml
-  --model.module=csmpn.models.motion_cssmpnn.MotionCliffordSharedSimplicialMPNN
+  - --model.module=csmpn.models.motion_cssmpnn.MotionCliffordSharedSimplicialMPNN
   - --trainer.val_check_interval=128
   - --trainer.max_steps=10000
   - ${args}

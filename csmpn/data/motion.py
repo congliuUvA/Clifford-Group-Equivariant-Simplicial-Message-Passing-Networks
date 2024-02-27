@@ -3,7 +3,6 @@ import torch
 import pickle 
 import numpy as np
 from csmpn.data.modules.simplicial_data import ManualTransform
-from csmpn.data.ESMPN.simplicial_data import ESMPN_ManualTransform
 from torch_geometric.data import Data, InMemoryDataset, DataLoader as PyGDataLoader
 import torch_geometric
 import os
@@ -242,12 +241,11 @@ class MotionSimplicialData(InMemoryDataset):
         torch.save((data, slices), self.processed_paths[0]) 
 
 class MotionDataset:
-    def __init__(self, batch_size=100, simplicial=False, num_training_samples=200, ESMPN=False):
+    def __init__(self, batch_size=100, simplicial=False, num_training_samples=20):
         torch_geometric.seed.seed_everything(0)
         self.batch_size = batch_size
         self.simplicial = simplicial
         self.label = "regular" if not self.simplicial else "simplicial"
-        self.model_name = "ESMPN" if ESMPN else "csmpn"
         if not simplicial:
             self.train_dataset = Motion(
                 partition='train', 
@@ -269,28 +267,24 @@ class MotionDataset:
             )
         else:
             self.pre_transform = ManualTransform()
-            if ESMPN:
-                self.pre_transform = ESMPN_ManualTransform()
             self.train_dataset = MotionSimplicialData(
-                root=f'{dataroot}motion{num_training_samples}_{self.label}_{self.model_name}',
+                root=f'{dataroot}motion{num_training_samples}_{self.label}',
                 transform=self.pre_transform, 
                 partition="train", 
                 num_samples=num_training_samples
             )
             self.valid_dataset = MotionSimplicialData(
-                root=f'{dataroot}motion{num_training_samples}_{self.label}_{self.model_name}',
+                root=f'{dataroot}motion{num_training_samples}_{self.label}',
                 transform=self.pre_transform, 
                 partition="val"
             )
             self.test_dataset = MotionSimplicialData(
-                root=f'{dataroot}motion{num_training_samples}_{self.label}_{self.model_name}',
+                root=f'{dataroot}motion{num_training_samples}_{self.label}',
                 transform=self.pre_transform, 
                 partition="test"
             )
         if self.simplicial:
             self.follow = ["node_types", "x_ind"]  
-            if ESMPN:
-                self.follow += ["x_0", "x_1", "x_2"]
         else:
             self.follow = None
 

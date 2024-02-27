@@ -19,6 +19,6 @@ parameters:
       ]
   dataset.batch_size:
     values: [16]
-  model.lr:
+  optimizer.lr:
     values: [0.001]
 

@@ -22,7 +22,7 @@ parameters:
     values:
       [
         --dataset.molecule_type='aspirin' --dataset.dis=3,
-        --dataset.molecule_type='benzene' --dataset.dis=10000,
+        --dataset.molecule_type='benzene2017' --dataset.dis=10000,
         --dataset.molecule_type='ethanol' --dataset.dis=10000,
         --dataset.molecule_type='malonaldehyde' --dataset.dis=10000,
       ]

@@ -20,7 +20,45 @@ from torch import tensor, Tensor
 from torch_geometric.data import Data
 from collections import defaultdict
 from typing import Tuple, Dict, Set, FrozenSet
-from csmpn.data.ESMPN.rips_lift import generate_indices as generate_indices_single, generate_features as generate_features_single, generate_simplices as generate_simplicies_single
+import math
+
+def generate_simplicies_single(simplex_tree: SimplexTree) -> Dict[int, Set[FrozenSet]]:
+    """
+    Generates dictionary of simplices. For each dimensions"""
+    sim = defaultdict(set)
+
+    for simplex, _ in simplex_tree.get_simplices():
+        dim = len(simplex) - 1
+        sim[dim].add(frozenset(simplex))
+
+    return sim
+
+
+def generate_indices_single(simplex_tree: SimplexTree) -> Dict[int, Dict[FrozenSet, int]]:
+    """
+    Generates a dictionary which assigns to each simplex a unique index used for reference when finding the different
+    adjacency types and invariants.
+    """
+    indices = defaultdict(dict)
+
+    for simplex, _ in simplex_tree.get_simplices():
+        dim = len(simplex) - 1
+        simplex_set = frozenset(simplex)
+
+        if simplex_set not in indices[dim]:
+            indices[dim][simplex_set] = len(indices[dim])
+
+    return indices
+
+def generate_features_single(simplices: Dict[int, Set[FrozenSet]], indices: Dict[int, Dict[FrozenSet, int]]) -> Dict[int, Tensor]:
+    x_dict = {}
+    for i in range(len(simplices)):
+        x = torch.zeros((len(simplices[i]), i + 1))
+        for k, v in indices[i].items():
+            x[v] = tensor(list(k))
+        x_dict[i] = x.long()
+
+    return x_dict
 
 def generate_adjacencies_single(indices: Dict, simplex_tree: SimplexTree) -> Tuple[Dict[str, Tensor], Dict[str, Tensor]]:
     """todo: add"""
